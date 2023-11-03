@@ -199,13 +199,13 @@ abstract class Protocol implements ProtocolInterface {
      */
     public function createStream($transport, string $host, int $port, int $timeout) {
         $socket = "$transport://$host:$port";
-        $stream = stream_socket_client($socket, $errno, $errstr, $timeout,
+        $stream = @stream_socket_client($socket, $errno, $errstr, $timeout,
             STREAM_CLIENT_CONNECT,
             stream_context_create($this->defaultSocketOptions($transport))
         );
 
         if (!$stream) {
-            throw new ConnectionFailedException($errstr, $errno);
+            throw new ConnectionFailedException($errstr ?: error_get_last()['message'], $errno);
         }
 
         if (false === stream_set_timeout($stream, $timeout)) {
