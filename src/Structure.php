@@ -103,7 +103,7 @@ class Structure {
      * @throws InvalidMessageDateException
      */
     private function parsePart(string $context, int $part_number = 0): array {
-        $body = $context;
+        $body = ltrim($context);
         while (($pos = strpos($body, "\r\n")) > 0) {
             $body = substr($body, $pos + 2);
         }
