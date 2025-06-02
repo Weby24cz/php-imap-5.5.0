@@ -304,9 +304,11 @@ class Attachment {
                 $name = urldecode($name);
             }
 
+            return $this->sanitizeName($name);
+
             // sanitize $name
             // order of '..' is important
-            return str_replace(['\\', '/', chr(0), ':', '..'], '', $name);
+            //return str_replace(['\\', '/', chr(0), ':', '..'], '', $name);
         }
         return "";
     }
@@ -404,5 +406,27 @@ class Attachment {
         }
 
         throw new MaskNotFoundException("Unknown mask provided: " . $mask);
+    }
+
+    /**
+     * Sanitize a given name to prevent common attacks
+     * !!IMPORTANT!! Do not rely on this method alone - this is just the bare minimum. Additional measures should be taken
+     * to ensure that the file is safe to use.
+     * @param string $name
+     *
+     * @return string
+     */
+    private function sanitizeName(string $name): string {
+        $replaces = [
+            '/\\\\/' => '',
+            '/[\/\0:]+/' => '',
+            '/\.+/' => '.',
+        ];
+        $name_starts_with_dots = str_starts_with($name, '..');
+        $name = preg_replace(array_keys($replaces), array_values($replaces), $name);
+        if($name_starts_with_dots) {
+            return substr($name, 1);
+        }
+        return $name;
     }
 }
